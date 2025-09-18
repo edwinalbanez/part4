@@ -60,18 +60,18 @@ describe('Favorite blog', () => {
     assert.strictEqual(favorite, null);
   });
 
-  test('Only one blog on the list', () => { 
+  test('Only one blog on the list', () => {
     const favorite = listHelper.favoriteBlog([blogs[0]]);
-    const {title, author, likes} = blogs[0];
-    const blog = {title, author, likes};
+    const { title, author, likes } = blogs[0];
+    const blog = { title, author, likes };
 
     assert.deepStrictEqual(blog, favorite);
   });
 
-  test('Many blogs on the list', () => { 
+  test('Many blogs on the list', () => {
     const favorite = listHelper.favoriteBlog(blogs);
-    const {title, author, likes} = blogs[2];
-    const blog = {title, author, likes};
+    const { title, author, likes } = blogs[2];
+    const blog = { title, author, likes };
 
     assert.deepStrictEqual(favorite, blog);
   });

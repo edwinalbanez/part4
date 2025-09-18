@@ -62,13 +62,17 @@ describe("Total likes", () => {
   test('Only one blog on the list', () => {
     const [blog] = blogs;
     const total = listHelper.totalLikes([blog]);
-    
+
     assert.strictEqual(total, blog.likes);
   });
 
   test('Many blogs on the list', () => {
     const total = blogs.reduce((total, blog) => total + blog.likes || 0, 0);
-    assert.strictEqual(total, listHelper.totalLikes(blogs)); 
+    const group = listHelper.mostBlogs(blogs);
+    console.log(group);
+
+    assert.strictEqual(total, listHelper.totalLikes(blogs));
   });
+
 
 });
