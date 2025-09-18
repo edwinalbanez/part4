@@ -1,8 +1,9 @@
-const { test, describe } = require("node:test");
-const assert = require("node:assert");
-const listHelper = require("../utils/list_helper");
+const { test, describe } = require('node:test');
+const assert = require('node:assert');
+const listHelper = require('../utils/list_helper')
 
-describe("Total likes", () => {
+describe('Favorite blog', () => {
+
   const blogs = [
     {
       _id: "5a422a851b54a676234d17f7",
@@ -54,21 +55,24 @@ describe("Total likes", () => {
     },
   ];
 
-  test("With an empty list returns zero", () => {
-    const total = listHelper.totalLikes([]);
-    assert.strictEqual(total, 0);
+  test('With empty list', () => {
+    const favorite = listHelper.favoriteBlog([]);
+    assert.strictEqual(favorite, null);
   });
 
-  test('Only one blog on the list', () => {
-    const [blog] = blogs;
-    const total = listHelper.totalLikes([blog]);
-    
-    assert.strictEqual(total, blog.likes);
+  test('Only one blog on the list', () => { 
+    const favorite = listHelper.favoriteBlog([blogs[0]]);
+    const {title, author, likes} = blogs[0];
+    const blog = {title, author, likes};
+
+    assert.deepStrictEqual(blog, favorite);
   });
 
-  test('Many blogs on the list', () => {
-    const total = blogs.reduce((total, blog) => total + blog.likes || 0, 0);
-    assert.strictEqual(total, listHelper.totalLikes(blogs)); 
-  });
+  test('Many blogs on the list', () => { 
+    const favorite = listHelper.favoriteBlog(blogs);
+    const {title, author, likes} = blogs[2];
+    const blog = {title, author, likes};
 
+    assert.deepStrictEqual(favorite, blog);
+  });
 });
