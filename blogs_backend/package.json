@@ -24,6 +24,7 @@
     "eslint": "^9.35.0",
     "globals": "^16.4.0",
     "lodash.countby": "^4.6.0",
+    "lodash.groupby": "^4.6.0",
     "lodash.maxby": "^4.6.0"
   }
 }

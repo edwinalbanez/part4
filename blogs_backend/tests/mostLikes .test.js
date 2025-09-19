@@ -1,8 +1,9 @@
-const { test, describe } = require("node:test");
-const assert = require("node:assert");
-const listHelper = require("../utils/list_helper");
+const { test, describe } = require('node:test');
+const assert = require('node:assert');
+const listHelper = require('../utils/list_helper');
 
-describe("Total likes", () => {
+describe('Author with the most likes', () => {
+
   const blogs = [
     {
       _id: "5a422a851b54a676234d17f7",
@@ -55,23 +56,30 @@ describe("Total likes", () => {
   ];
 
   test('Blogs are missing', () => {
-    const total = listHelper.totalLikes();
-    assert.strictEqual(total, 0);
+    const mostLikes = listHelper.mostLikes();
+    assert.strictEqual(mostLikes, null);
   });
 
-  test("With an empty list", () => {
-    const total = listHelper.totalLikes([]);
-    assert.strictEqual(total, 0);
+  test('With an empty list', () => {
+    const mostLikes = listHelper.mostLikes([]);
+    assert.strictEqual(mostLikes, null);
   });
 
   test('Only one blog on the list', () => {
-    const total = listHelper.totalLikes([blogs[0]]);
-    assert.strictEqual(total, blogs[0].likes);
+    const expectedResult = {
+      author: blogs[0].author,
+      likes: blogs[0].likes
+    }
+    const mostLikes = listHelper.mostLikes([blogs[0]]);
+    assert.deepStrictEqual(mostLikes, expectedResult);
   });
 
   test('Many blogs on the list', () => {
-    const expectedTotal = 36;
-    const total = listHelper.totalLikes(blogs)
-    assert.strictEqual(total, expectedTotal);
-  });
+    const expectedResult = {
+      author: "Edsger W. Dijkstra",
+      likes: 17
+    }
+    const mostLikes = listHelper.mostLikes(blogs);
+    assert.deepStrictEqual(mostLikes, expectedResult);
+  })
 });

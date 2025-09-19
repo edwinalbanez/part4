@@ -57,7 +57,7 @@ describe('Author with the most blogs', () => {
   test('Blogs are missing', () => {
     const mostBlogs = listHelper.mostBlogs();
     assert.strictEqual(mostBlogs, null);
-  })
+  });
 
   test('With an empty list', () => {
     const mostBlogs = listHelper.mostBlogs([]);
@@ -65,21 +65,21 @@ describe('Author with the most blogs', () => {
   });
 
   test('Only one blog on the list', () => {
-    const testAuthor = {
+    const expectedResult = {
       author: blogs[0].author,
       blogs: 1
     }
     const mostBlogs = listHelper.mostBlogs([blogs[0]]);
-    assert.deepStrictEqual(testAuthor, mostBlogs);
+    assert.deepStrictEqual(mostBlogs, expectedResult);
   })
 
   test('Many blogs on the list', () => {
-    const testAuthor = {
+    const expectedResult = {
       author: "Robert C. Martin",
       blogs: 3
     }
     const mostBlogs = listHelper.mostBlogs(blogs);
-    assert.deepStrictEqual(testAuthor, mostBlogs);
+    assert.deepStrictEqual(mostBlogs, expectedResult);
   });
 
 })

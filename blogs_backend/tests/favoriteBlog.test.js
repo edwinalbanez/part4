@@ -66,18 +66,22 @@ describe('Favorite blog', () => {
   });
 
   test('Only one blog on the list', () => {
+    const expectedResult = {
+      title: blogs[0].title,
+      author: blogs[0].author,
+      likes: blogs[0].likes
+    };
     const favorite = listHelper.favoriteBlog([blogs[0]]);
-    const { title, author, likes } = blogs[0];
-    const blog = { title, author, likes };
-
-    assert.deepStrictEqual(blog, favorite);
+    assert.deepStrictEqual(favorite, expectedResult);
   });
 
   test('Many blogs on the list', () => {
+    const expectedResult = {
+      title: "Canonical string reduction",
+      author: "Edsger W. Dijkstra",
+      likes: 12
+    }
     const favorite = listHelper.favoriteBlog(blogs);
-    const { title, author, likes } = blogs[2];
-    const blog = { title, author, likes };
-
-    assert.deepStrictEqual(favorite, blog);
+    assert.deepStrictEqual(favorite, expectedResult);
   });
 });
