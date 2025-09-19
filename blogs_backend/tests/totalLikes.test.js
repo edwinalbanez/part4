@@ -54,25 +54,23 @@ describe("Total likes", () => {
     },
   ];
 
-  test("With an empty list returns zero", () => {
+  test('Blogs are missing', () => {
+    const total = listHelper.totalLikes();
+    assert.strictEqual(total, 0);
+  })
+
+  test("With an empty list", () => {
     const total = listHelper.totalLikes([]);
     assert.strictEqual(total, 0);
   });
 
   test('Only one blog on the list', () => {
-    const [blog] = blogs;
-    const total = listHelper.totalLikes([blog]);
-
-    assert.strictEqual(total, blog.likes);
+    const total = listHelper.totalLikes([blogs[0]]);
+    assert.strictEqual(total, blogs[0].likes);
   });
 
   test('Many blogs on the list', () => {
     const total = blogs.reduce((total, blog) => total + blog.likes || 0, 0);
-    const group = listHelper.mostBlogs(blogs);
-    console.log(group);
-
     assert.strictEqual(total, listHelper.totalLikes(blogs));
   });
-
-
 });

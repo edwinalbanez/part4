@@ -55,7 +55,12 @@ describe('Favorite blog', () => {
     },
   ];
 
-  test('With empty list', () => {
+  test('Blogs are missing', () => {
+    const favorite = listHelper.favoriteBlog();
+    assert.strictEqual(favorite, null);
+  })
+
+  test('With an empty list', () => {
     const favorite = listHelper.favoriteBlog([]);
     assert.strictEqual(favorite, null);
   });

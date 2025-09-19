@@ -1,5 +1,4 @@
 const maxBy = require('lodash.maxby');
-const groupBy = require('lodash.groupby');
 const countBy = require('lodash.countby');
 
 const dummy = (blogs) => {
@@ -7,7 +6,7 @@ const dummy = (blogs) => {
 }
 
 const totalLikes = (blogs) => {
-  if (blogs.length === 0) {
+  if (!blogs || blogs.length === 0) {
     return 0
   }
 
@@ -22,7 +21,7 @@ const totalLikes = (blogs) => {
 
 const favoriteBlog = (blogs) => {
 
-  if (blogs.length === 0) {
+  if (!blogs || blogs.length === 0) {
     return null;
   }
 
@@ -48,8 +47,25 @@ const favoriteBlog = (blogs) => {
 }
 
 const mostBlogs = (blogs) => {
-  const blogsByAuthor = Object.values(groupBy(blogs, 'author'));
-  const blog = maxBy(blogsByAuthor, 'length');
+
+  if (!blogs || blogs.length === 0) {
+    return null;
+  }
+
+  if (blogs.length === 1) {
+    return {
+      author: blogs[0].author,
+      blogs: 1
+    }
+  }
+
+  //countBy returns { 'Michael Chan': 1, 'Edsger W. Dijkstra': 2, 'Robert C. Martin': 3 }
+
+  const blogsByAuthor = Object.entries(countBy(blogs, 'author'))
+    .map(([author, blogs]) => ({ author, blogs }));
+
+  const mostBlogsAuthor = maxBy(blogsByAuthor, 'blogs');
+  return mostBlogsAuthor;
 }
 
 module.exports = {
