@@ -30,7 +30,28 @@ test('The "id" property exists in all blogs', async () => {
 
   const idIsDefined = blogs.every(blog => 'id' in blog);
   assert(idIsDefined);
-})
+});
+
+test('A blog was successfully added', async () => {
+  const { body: initialBlogs } = await api.get('/api/blogs').expect(200);
+
+  const blogToAdd = {
+    title: "React patterns",
+    author: "Michael Chan",
+    url: "https://reactpatterns.com/",
+    likes: 7,
+  }
+  const { body: addedBlog } = await api.post('/api/blogs')
+    .send(blogToAdd)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const { body: blogsAfterPost } = await api.get('/api/blogs').expect(200);
+  assert.strictEqual(blogsAfterPost.length, initialBlogs.length + 1);
+
+  delete addedBlog.id;
+  assert.deepStrictEqual(blogToAdd, addedBlog);
+});
 
 after(async () => {
   await mongoose.connection.close();
