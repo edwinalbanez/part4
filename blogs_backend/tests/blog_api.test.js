@@ -25,6 +25,13 @@ test('Blogs are returned as JSON', async () => {
   assert.strictEqual(blogs.length, expectedQuantity);
 });
 
+test('The "id" property exists in all blogs', async () => {
+  const { body: blogs } = await api.get('/api/blogs').expect(200);
+
+  const idIsDefined = blogs.every(blog => 'id' in blog);
+  assert(idIsDefined);
+})
+
 after(async () => {
   await mongoose.connection.close();
 })
