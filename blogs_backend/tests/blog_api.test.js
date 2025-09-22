@@ -79,13 +79,15 @@ test('Title and URL are required', async () => {
     .expect(400);
 });
 
-test('Delete a blog', async () => {
+test('Error deleting a non-existent blog', async () => {
   const nonExistingId = await helper.fakeId();
   await api
     .delete(`/api/blogs/${nonExistingId}`)
     .expect(404);
+});
 
-  const [ blogToDelete ] = await helper.blogsInDB();
+test('Delete an existing blog', async () => {
+  const [blogToDelete] = await helper.blogsInDB();
   await api
     .delete(`/api/blogs/${blogToDelete.id}`)
     .expect(204);
