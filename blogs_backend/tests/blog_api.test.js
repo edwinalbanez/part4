@@ -53,6 +53,21 @@ test('A blog was successfully added', async () => {
   assert.deepStrictEqual(blogToAdd, addedBlog);
 });
 
+test('Likes are zero by default', async () => {
+  const blogToAdd = {
+    title: "React patterns",
+    author: "Michael Chan",
+    url: "https://reactpatterns.com/"
+  }
+
+  const { body: addedBlog } = await api.post('/api/blogs')
+    .send(blogToAdd)
+    .expect(201)
+
+  assert('likes' in addedBlog);
+  assert(addedBlog.likes === 0);
+});
+
 after(async () => {
   await mongoose.connection.close();
 })
