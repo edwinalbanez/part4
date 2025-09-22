@@ -1,4 +1,4 @@
-const { test, beforeEach, after } = require('node:test');
+const { test, beforeEach, after, describe } = require('node:test');
 const mongoose = require('mongoose');
 const assert = require('node:assert');
 const app = require('../app');
@@ -79,19 +79,62 @@ test('Title and URL are required', async () => {
     .expect(400);
 });
 
-test('Error deleting a non-existent blog', async () => {
-  const nonExistingId = await helper.fakeId();
-  await api
-    .delete(`/api/blogs/${nonExistingId}`)
-    .expect(404);
+describe('Deletion of a blog', () => {
+
+  test('Succeeds with an existing id', async () => {
+    const [blogToDelete] = await helper.blogsInDB();
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204);
+
+    await api
+      .get(`/api/blogs/${blogToDelete.id}`)
+      .expect(404);
+  });
+
+  test('Error with status code 404 if id does not exist', async () => {
+    const nonExistingId = await helper.fakeId();
+    await api
+      .delete(`/api/blogs/${nonExistingId}`)
+      .expect(404);
+  });
+
+  test('Error with status code 400 if id is invalid', async () => {
+    const invalidId = '123';
+    await api
+      .delete(`/api/blogs/${invalidId}`)
+      .expect(400);
+  });
 });
 
-test('Delete an existing blog', async () => {
-  const [blogToDelete] = await helper.blogsInDB();
-  await api
-    .delete(`/api/blogs/${blogToDelete.id}`)
-    .expect(204);
-})
+describe('Like a blog', () => {
+
+  test('Succeeds with an existing id', async () => {
+    const [ blog ] = await helper.blogsInDB();
+    const { body: updatedBlog } = await api
+      .put(`/api/blogs/${blog.id}/likes`)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    assert.strictEqual(updatedBlog.likes, blog.likes + 1);
+  });
+
+  test('Error with status code 404 if id does not exist', async () => {
+    const nonExistingId = await helper.fakeId();
+    await api
+      .put(`/api/blogs/${nonExistingId}/likes`)
+      .expect(404);
+  });
+
+  test('Error with status code 400 if id is invalid', async () => {
+    const invalidId = '123';
+    await api
+      .put(`/api/blogs/${invalidId}/likes`)
+      .expect(400);
+  });
+});
+
+
 
 after(async () => {
   await mongoose.connection.close();
