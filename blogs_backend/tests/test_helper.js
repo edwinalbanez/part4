@@ -34,7 +34,7 @@ const initialBlogs = [
 ];
 
 const fakeId = async () => {
-  const blog = new Blog({ title: 'delete me' });
+  const blog = new Blog(initialBlogs[0]);
   await blog.save();
   await blog.deleteOne();
 

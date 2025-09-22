@@ -79,6 +79,18 @@ test('Title and URL are required', async () => {
     .expect(400);
 });
 
+test('Delete a blog', async () => {
+  const nonExistingId = await helper.fakeId();
+  await api
+    .delete(`/api/blogs/${nonExistingId}`)
+    .expect(404);
+
+  const [ blogToDelete ] = await helper.blogsInDB();
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .expect(204);
+})
+
 after(async () => {
   await mongoose.connection.close();
 })
