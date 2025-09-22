@@ -9,9 +9,13 @@ const blogSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Author is missing.']
   },
-  url: String,
+  url: {
+    type: String,
+    required: [true, 'URL is missing']
+  },
   likes: {
     type: Number,
+    cast: '{VALUE} is not a number',
     default: 0
   }
 })

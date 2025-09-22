@@ -68,6 +68,17 @@ test('Likes are zero by default', async () => {
   assert(addedBlog.likes === 0);
 });
 
+test('Title and URL are required', async () => {
+  const blogToAdd = {
+    author: "Michael Chan",
+    likes: 7
+  }
+
+  await api.post('/api/blogs')
+    .send(blogToAdd)
+    .expect(400);
+});
+
 after(async () => {
   await mongoose.connection.close();
 })
