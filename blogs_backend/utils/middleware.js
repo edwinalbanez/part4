@@ -10,12 +10,15 @@ const errorHandler = (error, request, response, next) => {
 
   } else if (error.name === 'ValidationError') {
     const messages = {};
-
     Object.entries(error.errors).forEach(([key, value]) => {
       messages[key] = value.message
     });
-
     return response.status(400).json({ error: messages });
+
+  } else if (error.name === 'MongooseError') {
+    return response.status(409).json({
+      error: error.message
+    });
   }
   next(error);
 }

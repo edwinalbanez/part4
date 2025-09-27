@@ -5,6 +5,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const morgan = require('morgan')
 const blogsRouter = require('./controllers/blogs')
+const usersRouter = require('./controllers/users')
 const logger = require('./utils/logger')
 const middleware = require('./utils/middleware')
 
@@ -27,6 +28,7 @@ app.use(express.json())
 process.env.NODE_ENV !== 'test' && app.use(morgan('tiny'))
 
 app.use('/api/blogs', blogsRouter)
+app.use('/api/users', usersRouter)
 
 app.use(middleware.unknowEndpoint)
 app.use(middleware.errorHandler)
