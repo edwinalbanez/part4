@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 const morgan = require('morgan')
 const blogsRouter = require('./controllers/blogs')
 const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 const logger = require('./utils/logger')
 const middleware = require('./utils/middleware')
 
@@ -29,6 +30,7 @@ process.env.NODE_ENV !== 'test' && app.use(morgan('tiny'))
 
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
 
 app.use(middleware.unknowEndpoint)
 app.use(middleware.errorHandler)
