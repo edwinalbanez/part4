@@ -25,8 +25,9 @@ mongoose.connect(config.MONGODB_URI)
 
 app.use(cors())
 app.use(express.json())
-
 process.env.NODE_ENV !== 'test' && app.use(morgan('tiny'))
+
+app.use(middleware.tokenExtractor)
 
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)

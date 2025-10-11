@@ -10,24 +10,14 @@ blogsRouter.get('/', async (request, response) => {
   response.json(blogs);
 });
 
-const getTokenFrom = request => {
-  const authorization = request.get('authorization');
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '');
-  }
-
-  return null
-}
-
 blogsRouter.post('/', async (request, response) => {
-  const token = getTokenFrom(request);
-  if (!token) {
+  if (!request.token) {
     return response.status(403).json({
       error: 'Token is missing'
     })
   }
 
-  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  const decodedToken = jwt.verify(request.token, process.env.JWT_SECRET);
   if (!decodedToken.id) {
     return response.status(403).json({
       error: 'Invalid token'
