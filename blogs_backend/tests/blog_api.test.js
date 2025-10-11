@@ -5,6 +5,8 @@ const app = require('../app');
 const supertest = require('supertest');
 const Blog = require('../models/blog');
 const helper = require('./test_helper');
+const User = require('../models/user');
+const bcryptjs = require('bcryptjs');
 
 const api = supertest(app);
 
@@ -32,109 +34,150 @@ test('The "id" property exists in all blogs', async () => {
   assert(idIsDefined);
 });
 
-test('A blog was successfully added', async () => {
-  const { body: initialBlogs } = await api.get('/api/blogs').expect(200);
+describe('With authenticated user', () => {
+  let token;
+  let blogWithUser;
 
-  const blogToAdd = {
-    title: "React patterns",
-    author: "Michael Chan",
-    url: "https://reactpatterns.com/",
-    likes: 7,
-  }
-  const { body: addedBlog } = await api.post('/api/blogs')
-    .send(blogToAdd)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+  beforeEach(async() => {
+    await User.deleteMany({});
+    const user = new User({
+      name: "Edwin Albanez",
+      username: "albanez26",
+      passwordHash: await bcryptjs.hash("secure", 10)
+    });
+    await user.save();
 
-  const { body: blogsAfterPost } = await api.get('/api/blogs').expect(200);
-  assert.strictEqual(blogsAfterPost.length, initialBlogs.length + 1);
+    const { body } = await api.post('/api/login')
+      .send({ username: 'albanez26', password: 'secure' })
+      .expect(200);
 
-  delete addedBlog.id;
-  assert.deepStrictEqual(blogToAdd, addedBlog);
+    token = body.token;
+
+    const { body: createdBlog } = await api.post('/api/blogs')
+      .send({
+        title: "API Testing",
+        author: "Camila Monterroza",
+        url: "https://devs.example.com/api-testing",
+        likes: 167
+      })
+      .set({ authorization: `Bearer ${token}` })
+      .expect(201);
+
+    blogWithUser = createdBlog;
+  });
+
+  describe('Create blogs', () => {
+    test('A blog was successfully added', async () => {
+      const { body: initialBlogs } = await api.get('/api/blogs').expect(200);
+      const blogToAdd = {
+        title: "React patterns",
+        author: "Michael Chan",
+        url: "https://reactpatterns.com/",
+        likes: 7,
+      }
+      const { body: addedBlog } = await api.post('/api/blogs')
+        .send(blogToAdd)
+        .set({ authorization: `Bearer ${token}` })
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+      const { body: blogsAfterPost } = await api.get('/api/blogs').expect(200);
+      assert.strictEqual(blogsAfterPost.length, initialBlogs.length + 1);
+
+      delete addedBlog.id;
+      delete addedBlog.user;
+      assert.deepStrictEqual(blogToAdd, addedBlog);
+    });
+
+    test('Likes are zero by default', async () => {
+      const blogToAdd = {
+        title: "React patterns",
+        author: "Michael Chan",
+        url: "https://reactpatterns.com/"
+      }
+
+      const { body: addedBlog } = await api.post('/api/blogs')
+        .send(blogToAdd)
+        .set({ authorization: `Bearer ${token}` })
+        .expect(201)
+
+      assert('likes' in addedBlog);
+      assert(addedBlog.likes === 0);
+    });
+
+    test('Title and URL are required', async () => {
+      const blogToAdd = {
+        author: "Michael Chan",
+        likes: 7
+      }
+
+      await api.post('/api/blogs')
+        .send(blogToAdd)
+        .set({ authorization: `Bearer ${token}` })
+        .expect(400);
+    });
+  });
+
+  describe('Delete blogs', () => {
+
+    test('Succeeds with an existing id', async () => {
+      await api
+        .delete(`/api/blogs/${blogWithUser.id}`)
+        .set({ authorization: `Bearer ${token}` })
+        .expect(204);
+
+      await api
+        .get(`/api/blogs/${blogWithUser.id}`)
+        .expect(404);
+    });
+
+    test('Error with status code 404 if id does not exist', async () => {
+      const nonExistingId = await helper.fakeId();
+      await api
+        .delete(`/api/blogs/${nonExistingId}`)
+        .set({ authorization: `Bearer ${token}` })
+        .expect(404);
+    });
+
+    test('Error with status code 400 if id is invalid', async () => {
+      const invalidId = '123';
+      await api
+        .delete(`/api/blogs/${invalidId}`)
+        .set({ authorization: `Bearer ${token}` })
+        .expect(400);
+    });
+  });
+
+  describe('Like a blog', () => {
+    test('Succeeds with an existing id', async () => {
+      const [blog] = await helper.blogsInDB();
+      const { body: updatedBlog } = await api
+        .put(`/api/blogs/${blog.id}/likes`)
+        .set({ authorization: `Bearer ${token}` })
+        .expect(200)
+        .expect('Content-Type', /application\/json/);
+
+      assert.strictEqual(updatedBlog.likes, blog.likes + 1);
+    });
+
+    test('Error with status code 404 if id does not exist', async () => {
+      const nonExistingId = await helper.fakeId();
+      await api
+        .put(`/api/blogs/${nonExistingId}/likes`)
+        .set({ authorization: `Bearer ${token}` })
+        .expect(404);
+    });
+
+    test('Error with status code 400 if id is invalid', async () => {
+      const invalidId = '123';
+      await api
+        .put(`/api/blogs/${invalidId}/likes`)
+        .set({ authorization: `Bearer ${token}` })
+        .expect(400);
+    });
+  });
+
 });
-
-test('Likes are zero by default', async () => {
-  const blogToAdd = {
-    title: "React patterns",
-    author: "Michael Chan",
-    url: "https://reactpatterns.com/"
-  }
-
-  const { body: addedBlog } = await api.post('/api/blogs')
-    .send(blogToAdd)
-    .expect(201)
-
-  assert('likes' in addedBlog);
-  assert(addedBlog.likes === 0);
-});
-
-test('Title and URL are required', async () => {
-  const blogToAdd = {
-    author: "Michael Chan",
-    likes: 7
-  }
-
-  await api.post('/api/blogs')
-    .send(blogToAdd)
-    .expect(400);
-});
-
-describe('Deletion of a blog', () => {
-
-  test('Succeeds with an existing id', async () => {
-    const [blogToDelete] = await helper.blogsInDB();
-    await api
-      .delete(`/api/blogs/${blogToDelete.id}`)
-      .expect(204);
-
-    await api
-      .get(`/api/blogs/${blogToDelete.id}`)
-      .expect(404);
-  });
-
-  test('Error with status code 404 if id does not exist', async () => {
-    const nonExistingId = await helper.fakeId();
-    await api
-      .delete(`/api/blogs/${nonExistingId}`)
-      .expect(404);
-  });
-
-  test('Error with status code 400 if id is invalid', async () => {
-    const invalidId = '123';
-    await api
-      .delete(`/api/blogs/${invalidId}`)
-      .expect(400);
-  });
-});
-
-describe('Like a blog', () => {
-
-  test('Succeeds with an existing id', async () => {
-    const [ blog ] = await helper.blogsInDB();
-    const { body: updatedBlog } = await api
-      .put(`/api/blogs/${blog.id}/likes`)
-      .expect(200)
-      .expect('Content-Type', /application\/json/);
-
-    assert.strictEqual(updatedBlog.likes, blog.likes + 1);
-  });
-
-  test('Error with status code 404 if id does not exist', async () => {
-    const nonExistingId = await helper.fakeId();
-    await api
-      .put(`/api/blogs/${nonExistingId}/likes`)
-      .expect(404);
-  });
-
-  test('Error with status code 400 if id is invalid', async () => {
-    const invalidId = '123';
-    await api
-      .put(`/api/blogs/${invalidId}/likes`)
-      .expect(400);
-  });
-});
-
-
 
 after(async () => {
   await mongoose.connection.close();

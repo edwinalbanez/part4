@@ -10,7 +10,6 @@ blogsRouter.get('/', async (request, response) => {
 });
 
 blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
-
   const { user } = request;
   if (!user) {
     return response.status(403).json({
@@ -18,8 +17,8 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
     });
   }
 
-  const { title, author, url } = request.body;
-  const blog = new Blog({ title, author, url });
+  const { title, author, url, likes } = request.body;
+  const blog = new Blog({ title, author, url, likes });
   blog.user = user._id;
 
   const addedBlog = await blog.save();
@@ -60,12 +59,19 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) =
   }
 });
 
-blogsRouter.put('/:id/likes', async (request, response) => {
+blogsRouter.put('/:id/likes', middleware.userExtractor, async (request, response) => {
+  if (!request.user) {
+    return response.status(404).json({
+      error: 'User not found'
+    });
+  }
+
   const { id } = request.params;
   const blogToUpdate = await Blog.findById(id);
-
   if (!blogToUpdate) {
-    return response.status(404).json({ error: 'Blog not found' });
+    return response.status(404).json({
+      error: 'Blog not found'
+    });
   }
 
   blogToUpdate.likes += 1;
