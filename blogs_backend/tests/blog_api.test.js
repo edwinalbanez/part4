@@ -116,6 +116,25 @@ describe('With authenticated user', () => {
         .set({ authorization: `Bearer ${token}` })
         .expect(400);
     });
+
+    test('Fails if token is not provided', async () => {
+      const { body: initialBlogs } = await api.get('/api/blogs').expect(200);
+
+      const blogToAdd = {
+        title: "React patterns",
+        author: "Michael Chan",
+        url: "https://reactpatterns.com/",
+        likes: 7,
+      }
+      await api.post('/api/blogs')
+        .send(blogToAdd)
+        .set({ authorization: '' })
+        .expect(401);
+
+      const { body: blogsAfterPost } = await api.get('/api/blogs').expect(200);
+      assert.strictEqual(blogsAfterPost.length, initialBlogs.length);
+    });
+
   });
 
   describe('Delete blogs', () => {
